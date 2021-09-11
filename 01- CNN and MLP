@@ -1,0 +1,1685 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "name": "deep1.ipynb",
+      "provenance": []
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    },
+    "accelerator": "GPU"
+  },
+  "cells": [
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "ddP80WLFIMK6",
+        "outputId": "4e69b3df-5efe-43c7-8d8a-aed8fb58c24d"
+      },
+      "source": [
+        "cd /content/drive/MyDrive/deep1"
+      ],
+      "execution_count": 95,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "/content/drive/MyDrive/MachineLearning/deep1\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "cLXIifbQIn7N"
+      },
+      "source": [
+        "import tensorflow as tf\n",
+        "from tensorflow.keras.layers import Dense, Conv2D, MaxPool2D, Flatten\n",
+        "import numpy as np\n",
+        "import matplotlib.pyplot as plt\n",
+        "from tensorflow.keras.utils import to_categorical\n",
+        "from sklearn.model_selection import train_test_split\n",
+        "# from google.colab.patches import cv2_imshow"
+      ],
+      "execution_count": 2,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "xrBPxP2Y6MAv"
+      },
+      "source": [
+        "## mnist dataset"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "d0tlxWR7Iv6y",
+        "outputId": "f0ddf9e1-8fc3-4eed-dc33-50bf4f8bf4d7"
+      },
+      "source": [
+        "#load dataset\n",
+        "dataset = tf.keras.datasets.mnist\n",
+        "(X_train, Y_train), (X_test, Y_test) = dataset.load_data()\n",
+        "\n",
+        "print(X_train.shape, Y_train.shape, X_test.shape, Y_test.shape)\n",
+        "print(X_train.min(), X_train.max(), X_train.dtype)\n",
+        "print(X_test.min(), X_test.max(), X_test.dtype)\n",
+        "print(Y_train.min(), Y_train.max(), Y_train.dtype)\n",
+        "print(Y_test.min(), Y_test.max(), Y_test.dtype)"
+      ],
+      "execution_count": 97,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "(60000, 28, 28) (60000,) (10000, 28, 28) (10000,)\n",
+            "0 255 uint8\n",
+            "0 255 uint8\n",
+            "0 9 uint8\n",
+            "0 9 uint8\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 282
+        },
+        "id": "TCJjFZpj03i4",
+        "outputId": "7745f8eb-4c3a-420e-f262-bb2730ce1eda"
+      },
+      "source": [
+        "plt.imshow(X_train[5], cmap = 'gray')"
+      ],
+      "execution_count": 98,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "<matplotlib.image.AxesImage at 0x7f3db37ca910>"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 98
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "image/png": "iVBORw0KGgoAAAANSUhEUgAAAPsAAAD4CAYAAAAq5pAIAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEgAACxIB0t1+/AAAADh0RVh0U29mdHdhcmUAbWF0cGxvdGxpYiB2ZXJzaW9uMy4yLjIsIGh0dHA6Ly9tYXRwbG90bGliLm9yZy+WH4yJAAAORUlEQVR4nO3dcaiVdZ7H8c8307Crha7u5dLE6o5BiVGK1NrG4jI4mUFq0DQm4brVHWLCMbZIZv/QWqKMHZcoGHDIxl1mkwHNZKgZy2TdrRi0cMvKGW9xQ+3qRSrGqdDt+t0/7nN379R9fud2nuc5z9Hv+wWXc87zPc95vpz6+Dzn+Z3z/MzdBeDcd17dDQBoDcIOBEHYgSAIOxAEYQeCOL+VGzMzTv0DFXN3G2l5oT27mS00s9+ZWY+ZrSnyWgCqZc2Os5vZGEm/l7RA0hFJeyUtc/d3E+uwZwcqVsWe/RpJPe7+gbuflrRF0uICrwegQkXCfomkw8MeH8mW/Qkz6zazfWa2r8C2ABRU+Qk6d98oaaPEYTxQpyJ79qOSLh32+FvZMgBtqEjY90q6zMymm9k4Sd+XtKOctgCUrenDeHf/0szulfQbSWMkbXL3d0rrDECpmh56a2pjfGYHKlfJl2oAnD0IOxAEYQeCIOxAEIQdCIKwA0EQdiAIwg4EQdiBIAg7EARhB4Ig7EAQhB0IgrADQRB2IAjCDgRB2IEgCDsQBGEHgiDsQBCEHQiCsANBEHYgCMIOBEHYgSAIOxAEYQeCIOxAEIQdCKLpKZsBSZo4cWKyPmHChNzaTTfdlFx36tSpyfqGDRuS9VOnTiXr0RQKu5n1SjopaUDSl+4+t4ymAJSvjD3737r7iRJeB0CF+MwOBFE07C5pp5m9YWbdIz3BzLrNbJ+Z7Su4LQAFFD2Mv97dj5rZn0t6ycwOuvue4U9w942SNkqSmXnB7QFoUqE9u7sfzW77JT0n6ZoymgJQvqbDbmYdZjZx6L6k70o6UFZjAMpV5DC+U9JzZjb0Ov/u7r8upSu0zLRp05L1Bx98MFmfN29esj5r1qxv2tKodXV1JeurVq2qbNtno6bD7u4fSLqqxF4AVIihNyAIwg4EQdiBIAg7EARhB4Iw99Z9qY1v0FXj8ssvz62tXr06ue7y5cuT9fHjxyfr2dBrrsOHD+fWTp48mVz3iiuuSNZPnEj//mr+/Pm5tYMHDybXPZu5+4j/UdizA0EQdiAIwg4EQdiBIAg7EARhB4Ig7EAQXEq6DVx88cXJ+vr165P12267LbfW6FLPRR06dChZv+GGG3JrY8eOTa7baCx8ypQpherRsGcHgiDsQBCEHQiCsANBEHYgCMIOBEHYgSAYZ28DS5cuTdbvuuuuFnXyde+//36yvmDBgmQ99Xv2GTNmNNUTmsOeHQiCsANBEHYgCMIOBEHYgSAIOxAEYQeCYJy9Ddx6662VvXZvb2+yvnfv3mS90ZTNqXH0RhpdFx7larhnN7NNZtZvZgeGLZtsZi+Z2aHsdlK1bQIoajSH8T+XtPAry9ZI2uXul0nalT0G0MYaht3d90j6+CuLF0vanN3fLGlJyX0BKFmzn9k73b0vu39MUmfeE82sW1J3k9sBUJLCJ+jc3VMTNrr7RkkbJSZ2BOrU7NDbcTPrkqTstr+8lgBUodmw75C0Iru/QtLz5bQDoCoND+PN7FlJ8yVNMbMjktZKekzSL83sTkkfSvpelU2e6+6+++5kvbs7fcpj586dubWenp7kuv399R2UdXbmnupBBRqG3d2X5ZS+U3IvACrE12WBIAg7EARhB4Ig7EAQhB0Igp+4toGPPvooWV+3bl1rGmmxefPm1d1CKOzZgSAIOxAEYQeCIOxAEIQdCIKwA0EQdiAIxtmDW7VqVbLe0dFR2bavvPLKQuu/9tpryfrrr79e6PXPNezZgSAIOxAEYQeCIOxAEIQdCIKwA0EQdiAIxtnPAhdeeGGyPnPmzNza2rVrk+suWrSoqZ6GnHdeen9x5syZpl+70e/8V65cmawPDAw0ve1zEXt2IAjCDgRB2IEgCDsQBGEHgiDsQBCEHQiCcfYWGDt2bLI+e/bsZH3r1q3JeldXV27tiy++SK7baCy70W/CFy5cmKw3+o5Ayvnnp//3vOWWW5L1J554Ird2+vTppno6mzXcs5vZJjPrN7MDw5atM7OjZrY/+yv2zQwAlRvNYfzPJY30z/e/uPvV2d8L5bYFoGwNw+7ueyR93IJeAFSoyAm6e83srewwf1Lek8ys28z2mdm+AtsCUFCzYf+ppG9LulpSn6Sf5D3R3Te6+1x3n9vktgCUoKmwu/txdx9w9zOSfibpmnLbAlC2psJuZsPHepZKOpD3XADtwdw9/QSzZyXNlzRF0nFJa7PHV0tySb2SfuDufQ03Zpbe2Flq3LhxyXqjseht27YV2v5DDz2UW3vllVeS67766qvJ+uTJk5P1Rq8/a9asZL1Ky5cvz61t3749ue6pU6fKbqdl3N1GWt7wSzXuvmyExU8X7ghAS/F1WSAIwg4EQdiBIAg7EARhB4JoOPRW6sbO4qG31M9UH3744eS6DzzwQKFtv/jii8n6HXfckVv79NNPk+tOnTo1WX/hhfRvnObMmZOsp35K+vjjjyfXbTRst3jx4mQ95eWXX07W169fn6x/8sknTW9bkvbv319o/ZS8oTf27EAQhB0IgrADQRB2IAjCDgRB2IEgCDsQBOPsmTFjxiTrjzzySG7t/vvvT6772WefJetr1qxJ1rds2ZKsp8Z8585NXyDoqaeeStYbrd/T05Os33PPPbm13bt3J9e96KKLkvXrrrsuWU/9xPXmm29OrtvR0ZGsN3L48OFkffr06YVeP4VxdiA4wg4EQdiBIAg7EARhB4Ig7EAQhB0IgnH2TGo8WJKefPLJ3Nrnn3+eXLe7uztZ37lzZ7J+7bXXJusrV67Mrd14443JdcePH5+sN/qt/jPPPJOsNxpvrsuyZSNdNPn/3X777YVe/7777kvWG30/oQjG2YHgCDsQBGEHgiDsQBCEHQiCsANBEHYgCMbZM3196RmnU9dXbzS978GDB5P1Rr+dnjFjRrJexLp165L1Rx99NFkfGBgosRuUoelxdjO71Mx2m9m7ZvaOmf0oWz7ZzF4ys0PZ7aSymwZQntEcxn8p6R/cfaakv5L0QzObKWmNpF3ufpmkXdljAG2qYdjdvc/d38zun5T0nqRLJC2WtDl72mZJS6pqEkBx53+TJ5vZNEmzJf1WUqe7D33QPSapM2edbknpL4cDqNyoz8ab2QRJWyWtdvc/DK/54Fm+EU++uftGd5/r7ukrFwKo1KjCbmZjNRj0X7j7tmzxcTPryupdkvqraRFAGRoexpuZSXpa0nvuvmFYaYekFZIey26fr6TDFjl27Fiynhp6u+CCC5LrXnXVVU31NKTRtMl79uzJrW3fvj25bm9vb7LO0Nq5YzSf2f9a0h2S3jazoUmlf6zBkP/SzO6U9KGk71XTIoAyNAy7u/+XpBEH6SV9p9x2AFSFr8sCQRB2IAjCDgRB2IEgCDsQBD9xzUycODFZX7Ik/6v/c+bMSa7b35/+vtGmTZuS9dSUzJJ0+vTpZB2xcClpIDjCDgRB2IEgCDsQBGEHgiDsQBCEHQiCcXbgHMM4OxAcYQeCIOxAEIQdCIKwA0EQdiAIwg4EQdiBIAg7EARhB4Ig7EAQhB0IgrADQRB2IAjCDgTRMOxmdqmZ7Tazd83sHTP7UbZ8nZkdNbP92d+i6tsF0KyGF68wsy5JXe7+pplNlPSGpCUanI/9j+7+z6PeGBevACqXd/GK0czP3iepL7t/0szek3RJue0BqNo3+sxuZtMkzZb022zRvWb2lpltMrNJOet0m9k+M9tXqFMAhYz6GnRmNkHSf0h6xN23mVmnpBOSXNI/afBQ/+8bvAaH8UDF8g7jRxV2Mxsr6VeSfuPuG0aoT5P0K3ef1eB1CDtQsaYvOGlmJulpSe8ND3p24m7IUkkHijYJoDqjORt/vaT/lPS2pDPZ4h9LWibpag0exvdK+kF2Mi/1WuzZgYoVOowvC2EHqsd144HgCDsQBGEHgiDsQBCEHQiCsANBEHYgCMIOBEHYgSAIOxAEYQeCIOxAEIQdCIKwA0E0vOBkyU5I+nDY4ynZsnbUrr21a18SvTWrzN7+Iq/Q0t+zf23jZvvcfW5tDSS0a2/t2pdEb81qVW8cxgNBEHYgiLrDvrHm7ae0a2/t2pdEb81qSW+1fmYH0Dp179kBtAhhB4KoJexmttDMfmdmPWa2po4e8phZr5m9nU1DXev8dNkcev1mdmDYsslm9pKZHcpuR5xjr6be2mIa78Q047W+d3VPf97yz+xmNkbS7yUtkHRE0l5Jy9z93ZY2ksPMeiXNdffav4BhZn8j6Y+S/nVoai0ze1zSx+7+WPYP5SR3f7BNelunbziNd0W95U0z/neq8b0rc/rzZtSxZ79GUo+7f+DupyVtkbS4hj7anrvvkfTxVxYvlrQ5u79Zg/+ztFxOb23B3fvc/c3s/klJQ9OM1/reJfpqiTrCfomkw8MeH1F7zffuknaa2Rtm1l13MyPoHDbN1jFJnXU2M4KG03i30lemGW+b966Z6c+L4gTd113v7nMk3Sjph9nhalvywc9g7TR2+lNJ39bgHIB9kn5SZzPZNONbJa129z8Mr9X53o3QV0vetzrCflTSpcMefytb1hbc/Wh22y/pOQ1+7Ggnx4dm0M1u+2vu5/+4+3F3H3D3M5J+phrfu2ya8a2SfuHu27LFtb93I/XVqvetjrDvlXSZmU03s3GSvi9pRw19fI2ZdWQnTmRmHZK+q/abinqHpBXZ/RWSnq+xlz/RLtN4500zrprfu9qnP3f3lv9JWqTBM/LvS/rHOnrI6esvJf139vdO3b1JelaDh3X/o8FzG3dK+jNJuyQdkvSypMlt1Nu/aXBq77c0GKyumnq7XoOH6G9J2p/9Lar7vUv01ZL3ja/LAkFwgg4IgrADQRB2IAjCDgRB2IEgCDsQBGEHgvhfT0hvXT6gH6cAAAAASUVORK5CYII=\n",
+            "text/plain": [
+              "<Figure size 432x288 with 1 Axes>"
+            ]
+          },
+          "metadata": {
+            "needs_background": "light"
+          }
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "K189Nu-lJB4T",
+        "outputId": "6e7cfc76-e783-4e55-e87a-6c7ea9684cb6"
+      },
+      "source": [
+        "#normalize and convert labels to_categorical\n",
+        "X_train = X_train.astype('float32') / 255.\n",
+        "X_test = X_test.astype('float32') / 255.\n",
+        "print(X_train.min(), X_train.max(), X_train.dtype)\n",
+        "\n",
+        "classes = np.unique(Y_train)\n",
+        "Y_train = to_categorical(Y_train, num_classes=len(classes))\n",
+        "Y_test = to_categorical(Y_test, num_classes=len(classes))\n",
+        "print(Y_train.shape, Y_test.shape)\n",
+        "print(Y_train[0])"
+      ],
+      "execution_count": 99,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "0.0 1.0 float32\n",
+            "(60000, 10) (10000, 10)\n",
+            "[0. 0. 0. 0. 0. 1. 0. 0. 0. 0.]\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "dbdo_A2mTaSA"
+      },
+      "source": [
+        "### deep model(cnn) on mnist dataset\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "lcS-IxIbEonM",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "outputId": "1fb4b454-2560-48ba-c10d-a04dacb87c94"
+      },
+      "source": [
+        "input_shape = (28, 28, 1)\n",
+        "\n",
+        "model = tf.keras.models.Sequential([\n",
+        "         Conv2D(32, (3, 3), input_shape=input_shape, activation='relu'),\n",
+        "         MaxPool2D((2, 2)),\n",
+        "         Flatten(),\n",
+        "         Dense(100, activation='relu'),\n",
+        "         Dense(10, activation='softmax')                          \n",
+        "])\n",
+        "\n",
+        "model.compile(optimizer=tf.keras.optimizers.Adam(),\n",
+        "              loss=tf.keras.losses.categorical_crossentropy,\n",
+        "              metrics='accuracy')\n",
+        "\n",
+        "model.summary()"
+      ],
+      "execution_count": 100,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Model: \"sequential_16\"\n",
+            "_________________________________________________________________\n",
+            "Layer (type)                 Output Shape              Param #   \n",
+            "=================================================================\n",
+            "conv2d_8 (Conv2D)            (None, 26, 26, 32)        320       \n",
+            "_________________________________________________________________\n",
+            "max_pooling2d_8 (MaxPooling2 (None, 13, 13, 32)        0         \n",
+            "_________________________________________________________________\n",
+            "flatten_8 (Flatten)          (None, 5408)              0         \n",
+            "_________________________________________________________________\n",
+            "dense_40 (Dense)             (None, 100)               540900    \n",
+            "_________________________________________________________________\n",
+            "dense_41 (Dense)             (None, 10)                1010      \n",
+            "=================================================================\n",
+            "Total params: 542,230\n",
+            "Trainable params: 542,230\n",
+            "Non-trainable params: 0\n",
+            "_________________________________________________________________\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "i5JWJreJGr5U",
+        "outputId": "a9d022b7-e1cb-4857-81a6-bc7daf89f145"
+      },
+      "source": [
+        "X_train1 = X_train[..., tf.newaxis]\n",
+        "X_train1, X_val1, Y_train1, Y_val1 = train_test_split(X_train1, Y_train, test_size=0.2)\n",
+        "\n",
+        "model.fit(X_train1, Y_train1, validation_data=(X_val1, Y_val1), epochs=5)"
+      ],
+      "execution_count": 101,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Epoch 1/5\n",
+            "1500/1500 [==============================] - 32s 21ms/step - loss: 0.1751 - accuracy: 0.9476 - val_loss: 0.0765 - val_accuracy: 0.9780\n",
+            "Epoch 2/5\n",
+            "1500/1500 [==============================] - 31s 21ms/step - loss: 0.0620 - accuracy: 0.9809 - val_loss: 0.0611 - val_accuracy: 0.9827\n",
+            "Epoch 3/5\n",
+            "1500/1500 [==============================] - 31s 21ms/step - loss: 0.0395 - accuracy: 0.9876 - val_loss: 0.0468 - val_accuracy: 0.9850\n",
+            "Epoch 4/5\n",
+            "1500/1500 [==============================] - 31s 21ms/step - loss: 0.0268 - accuracy: 0.9916 - val_loss: 0.0497 - val_accuracy: 0.9862\n",
+            "Epoch 5/5\n",
+            "1500/1500 [==============================] - 31s 20ms/step - loss: 0.0193 - accuracy: 0.9939 - val_loss: 0.0536 - val_accuracy: 0.9841\n"
+          ]
+        },
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "<keras.callbacks.History at 0x7f3d9a2d5a10>"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 101
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "BW63aTlyWflR",
+        "outputId": "24264539-4723-4377-f09a-f16d99c0d32a"
+      },
+      "source": [
+        "# evaluate\n",
+        "X_test1 = X_test[..., tf.newaxis]\n",
+        "acc = model.evaluate(X_test1, Y_test)\n",
+        "\n",
+        "print(\"deep model accuracy \", acc)"
+      ],
+      "execution_count": 102,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "313/313 [==============================] - 2s 8ms/step - loss: 0.0576 - accuracy: 0.9829\n",
+            "deep model accuracy  [0.05764823034405708, 0.9829000234603882]\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "fjia0742UkkU"
+      },
+      "source": [
+        "### mlp on mnist dataset"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "1dxX0G4B4rwr",
+        "outputId": "ca7c4aef-57b8-43cc-dc91-af706e99aefc"
+      },
+      "source": [
+        "X_train = np.reshape(X_train, (-1, X_train.shape[1]* X_train.shape[2]))\n",
+        "X_test = np.reshape(X_test, (-1, X_test.shape[1] * X_test.shape[2]))\n",
+        "print(X_train.shape, X_test.shape)"
+      ],
+      "execution_count": 103,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "(60000, 784) (10000, 784)\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "3pQMVOD9Jq7j"
+      },
+      "source": [
+        "input_dim = X_train.shape[1]\n",
+        "\n",
+        "model = tf.keras.models.Sequential([\n",
+        "         Dense(64, input_dim = input_dim, activation='relu'),\n",
+        "         Dense(32, activation = 'relu'),\n",
+        "         Dense(10, activation='softmax')                          \n",
+        "])\n",
+        "\n",
+        "model.compile(optimizer=tf.keras.optimizers.Adam(),\n",
+        "              loss=tf.keras.losses.categorical_crossentropy,\n",
+        "              metrics='accuracy')"
+      ],
+      "execution_count": 104,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "PtFbtSOBMUO-",
+        "outputId": "b6fc763d-f38c-47cf-ac32-836e3ca5b70b"
+      },
+      "source": [
+        "X_train, X_val, Y_train, Y_val = train_test_split(X_train, Y_train, test_size=0.2)\n",
+        "\n",
+        "model.fit(X_train, Y_train, validation_data=(X_val, Y_val), epochs=5)"
+      ],
+      "execution_count": 105,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Epoch 1/5\n",
+            "1500/1500 [==============================] - 4s 2ms/step - loss: 0.3250 - accuracy: 0.9047 - val_loss: 0.1754 - val_accuracy: 0.9472\n",
+            "Epoch 2/5\n",
+            "1500/1500 [==============================] - 3s 2ms/step - loss: 0.1440 - accuracy: 0.9569 - val_loss: 0.1330 - val_accuracy: 0.9592\n",
+            "Epoch 3/5\n",
+            "1500/1500 [==============================] - 3s 2ms/step - loss: 0.1064 - accuracy: 0.9679 - val_loss: 0.1178 - val_accuracy: 0.9646\n",
+            "Epoch 4/5\n",
+            "1500/1500 [==============================] - 4s 2ms/step - loss: 0.0828 - accuracy: 0.9747 - val_loss: 0.1089 - val_accuracy: 0.9675\n",
+            "Epoch 5/5\n",
+            "1500/1500 [==============================] - 3s 2ms/step - loss: 0.0682 - accuracy: 0.9784 - val_loss: 0.1109 - val_accuracy: 0.9663\n"
+          ]
+        },
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "<keras.callbacks.History at 0x7f3d936cf490>"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 105
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "hO9WHnyvNxBc",
+        "outputId": "ad2a7e98-9b04-4428-88f9-aa01cfdbc46b"
+      },
+      "source": [
+        "# eavaluate\n",
+        "acc = mlp_model.evaluate(X_test, Y_test)\n",
+        "print(\"mlp accuracy\", acc)"
+      ],
+      "execution_count": 106,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "313/313 [==============================] - 1s 2ms/step - loss: 0.1018 - accuracy: 0.9706\n",
+            "mlp accuracy [0.10180678218603134, 0.9706000089645386]\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "rd6_DRGm6Phj"
+      },
+      "source": [
+        "# fasion_mnist dataset"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "gimUGoFuOKcE",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "outputId": "79985f1e-5c15-47e9-8e11-083c3ac22b19"
+      },
+      "source": [
+        "dataset = tf.keras.datasets.fashion_mnist\n",
+        "(X_train, Y_train), (X_test, Y_test) = dataset.load_data()\n",
+        "\n",
+        "print(X_train.shape, Y_train.shape, X_test.shape, Y_test.shape)\n",
+        "print(X_train.min(), X_train.max(), X_train.dtype)\n",
+        "print(X_test.min(), X_test.max(), X_test.dtype)\n",
+        "print(Y_train.min(), Y_train.max(), Y_train.dtype)\n",
+        "print(Y_test.min(), Y_test.max(), Y_test.dtype)"
+      ],
+      "execution_count": 107,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "(60000, 28, 28) (60000,) (10000, 28, 28) (10000,)\n",
+            "0 255 uint8\n",
+            "0 255 uint8\n",
+            "0 9 uint8\n",
+            "0 9 uint8\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 282
+        },
+        "id": "ym9nZk_G6elT",
+        "outputId": "d3ec9d84-d979-4078-a659-389c9e67c64b"
+      },
+      "source": [
+        "plt.imshow(X_train[5], cmap = 'gray')"
+      ],
+      "execution_count": 108,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "<matplotlib.image.AxesImage at 0x7f3d93617610>"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 108
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "image/png": "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\n",
+            "text/plain": [
+              "<Figure size 432x288 with 1 Axes>"
+            ]
+          },
+          "metadata": {
+            "needs_background": "light"
+          }
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "C8n6Fmod6hHc",
+        "outputId": "36d0b69f-72b6-4024-cec9-228f98d032d9"
+      },
+      "source": [
+        "X_train = X_train.astype('float32') / 255.\n",
+        "X_test = X_test.astype('float32') / 255.\n",
+        "\n",
+        "print(X_train.min(), X_train.max(), X_train.dtype)\n",
+        "\n",
+        "classes = np.unique(Y_train)\n",
+        "Y_train = to_categorical(Y_train, num_classes=len(classes))\n",
+        "Y_test = to_categorical(Y_test, num_classes=len(classes))\n",
+        "print(Y_train.shape, Y_test.shape)\n",
+        "print(Y_train[0])"
+      ],
+      "execution_count": 109,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "0.0 1.0 float32\n",
+            "(60000, 10) (10000, 10)\n",
+            "[0. 0. 0. 0. 0. 0. 0. 0. 0. 1.]\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "rQGVU22HXVCK"
+      },
+      "source": [
+        "### deep model(cnn) on fasion_mnist dataset"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "u539rtYBVRhP",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "outputId": "dc266b61-bcd6-4310-ad36-bb7a6db58acd"
+      },
+      "source": [
+        "input_shape = (28, 28, 1)\n",
+        "\n",
+        "model = tf.keras.models.Sequential([\n",
+        "         Conv2D(64, (3, 3), input_shape=input_shape, activation='relu'),\n",
+        "         MaxPool2D((2, 2)),\n",
+        "         Flatten(),\n",
+        "         Dense(100, activation='relu'),\n",
+        "         Dense(10, activation='softmax')                          \n",
+        "])\n",
+        "\n",
+        "model.compile(optimizer=tf.keras.optimizers.Adam(),\n",
+        "              loss=tf.keras.losses.categorical_crossentropy,\n",
+        "              metrics='accuracy')\n",
+        "\n",
+        "model.summary()"
+      ],
+      "execution_count": 110,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Model: \"sequential_18\"\n",
+            "_________________________________________________________________\n",
+            "Layer (type)                 Output Shape              Param #   \n",
+            "=================================================================\n",
+            "conv2d_9 (Conv2D)            (None, 26, 26, 64)        640       \n",
+            "_________________________________________________________________\n",
+            "max_pooling2d_9 (MaxPooling2 (None, 13, 13, 64)        0         \n",
+            "_________________________________________________________________\n",
+            "flatten_9 (Flatten)          (None, 10816)             0         \n",
+            "_________________________________________________________________\n",
+            "dense_45 (Dense)             (None, 100)               1081700   \n",
+            "_________________________________________________________________\n",
+            "dense_46 (Dense)             (None, 10)                1010      \n",
+            "=================================================================\n",
+            "Total params: 1,083,350\n",
+            "Trainable params: 1,083,350\n",
+            "Non-trainable params: 0\n",
+            "_________________________________________________________________\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "6UtCawPRVZkv",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "outputId": "56c097df-c479-47bc-8ac5-ef2925fab00c"
+      },
+      "source": [
+        "X_train1 = X_train[..., tf.newaxis]\n",
+        "X_test1 = X_test[..., tf.newaxis]\n",
+        "\n",
+        "X_train1, X_val1, Y_train1, Y_val1 = train_test_split(X_train1, Y_train, test_size=0.2)\n",
+        "\n",
+        "model.fit(X_train1, Y_train1, validation_data=(X_val1, Y_val1), epochs=5)"
+      ],
+      "execution_count": 111,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Epoch 1/5\n",
+            "1500/1500 [==============================] - 51s 34ms/step - loss: 0.3980 - accuracy: 0.8579 - val_loss: 0.3001 - val_accuracy: 0.8926\n",
+            "Epoch 2/5\n",
+            "1500/1500 [==============================] - 48s 32ms/step - loss: 0.2686 - accuracy: 0.9017 - val_loss: 0.2646 - val_accuracy: 0.9046\n",
+            "Epoch 3/5\n",
+            "1500/1500 [==============================] - 48s 32ms/step - loss: 0.2224 - accuracy: 0.9183 - val_loss: 0.2519 - val_accuracy: 0.9115\n",
+            "Epoch 4/5\n",
+            "1500/1500 [==============================] - 47s 32ms/step - loss: 0.1873 - accuracy: 0.9309 - val_loss: 0.2498 - val_accuracy: 0.9124\n",
+            "Epoch 5/5\n",
+            "1500/1500 [==============================] - 48s 32ms/step - loss: 0.1580 - accuracy: 0.9419 - val_loss: 0.2801 - val_accuracy: 0.9043\n"
+          ]
+        },
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "<keras.callbacks.History at 0x7f3d934f6590>"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 111
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "OYCZVmzRYWUw",
+        "outputId": "87b2eb09-a967-4065-e059-0f1d10d7337b"
+      },
+      "source": [
+        "# evaluate\n",
+        "acc = model.evaluate(X_test1, Y_test)\n",
+        "\n",
+        "print(\"deep model accuracy \", acc)"
+      ],
+      "execution_count": 112,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "313/313 [==============================] - 3s 10ms/step - loss: 0.2972 - accuracy: 0.8976\n",
+            "deep model accuracy  [0.29716673493385315, 0.897599995136261]\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "2fpY8WAsXvM3"
+      },
+      "source": [
+        "### MLP on on fasion_mnist dataset"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "JDQlDyO0yxxo",
+        "outputId": "0112a3d6-8cbd-441f-d5c1-ba3e1f0a2878"
+      },
+      "source": [
+        "X_train = np.reshape(X_train, (-1, X_train.shape[1]* X_train.shape[2]))\n",
+        "X_test = np.reshape(X_test, (-1, X_test.shape[1] * X_test.shape[2]))\n",
+        "print(X_train.shape, X_test.shape)\n"
+      ],
+      "execution_count": 120,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "(150000, 1024) (30000, 1024)\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "SR88IyUp73SY"
+      },
+      "source": [
+        "input_dim = X_train.shape[1]\n",
+        "\n",
+        "model = tf.keras.models.Sequential([\n",
+        "         Dense(64, input_dim = input_dim, activation='relu'),\n",
+        "         Dense(32, activation = 'relu'),\n",
+        "         Dense(10, activation='softmax')                          \n",
+        "])\n",
+        "\n",
+        "model.compile(optimizer=tf.keras.optimizers.Adam(),\n",
+        "              loss=tf.keras.losses.categorical_crossentropy,\n",
+        "              metrics='accuracy')"
+      ],
+      "execution_count": 121,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "TvnxPEKw79bI",
+        "outputId": "c250cfdd-da83-4afd-adcf-a18e019aed75"
+      },
+      "source": [
+        "X_train, X_val, Y_train, Y_val = train_test_split(X_train, Y_train, test_size=0.2)\n",
+        "\n",
+        "model.fit(X_train, Y_train, validation_data = (X_val, Y_val), epochs=10)"
+      ],
+      "execution_count": 115,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Epoch 1/10\n",
+            "1500/1500 [==============================] - 4s 2ms/step - loss: 0.5519 - accuracy: 0.8102 - val_loss: 0.4435 - val_accuracy: 0.8373\n",
+            "Epoch 2/10\n",
+            "1500/1500 [==============================] - 4s 2ms/step - loss: 0.4026 - accuracy: 0.8555 - val_loss: 0.3725 - val_accuracy: 0.8610\n",
+            "Epoch 3/10\n",
+            "1500/1500 [==============================] - 4s 3ms/step - loss: 0.3624 - accuracy: 0.8690 - val_loss: 0.3762 - val_accuracy: 0.8602\n",
+            "Epoch 4/10\n",
+            "1500/1500 [==============================] - 4s 2ms/step - loss: 0.3376 - accuracy: 0.8759 - val_loss: 0.3504 - val_accuracy: 0.8685\n",
+            "Epoch 5/10\n",
+            "1500/1500 [==============================] - 4s 2ms/step - loss: 0.3170 - accuracy: 0.8833 - val_loss: 0.3486 - val_accuracy: 0.8683\n",
+            "Epoch 6/10\n",
+            "1500/1500 [==============================] - 4s 2ms/step - loss: 0.3018 - accuracy: 0.8880 - val_loss: 0.3499 - val_accuracy: 0.8699\n",
+            "Epoch 7/10\n",
+            "1500/1500 [==============================] - 4s 2ms/step - loss: 0.2911 - accuracy: 0.8923 - val_loss: 0.3507 - val_accuracy: 0.8743\n",
+            "Epoch 8/10\n",
+            "1500/1500 [==============================] - 3s 2ms/step - loss: 0.2826 - accuracy: 0.8961 - val_loss: 0.3330 - val_accuracy: 0.8800\n",
+            "Epoch 9/10\n",
+            "1500/1500 [==============================] - 3s 2ms/step - loss: 0.2692 - accuracy: 0.9006 - val_loss: 0.3236 - val_accuracy: 0.8802\n",
+            "Epoch 10/10\n",
+            "1500/1500 [==============================] - 4s 3ms/step - loss: 0.2614 - accuracy: 0.9011 - val_loss: 0.3495 - val_accuracy: 0.8733\n"
+          ]
+        },
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "<keras.callbacks.History at 0x7f3d932ffc90>"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 115
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "5eFV8lJf8CLk",
+        "outputId": "a6ddd048-286b-4c3b-f255-022e76239005"
+      },
+      "source": [
+        "model.evaluate(X_test, Y_test)\n",
+        "print(\"mlp accuracy \", acc)"
+      ],
+      "execution_count": 116,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "313/313 [==============================] - 1s 2ms/step - loss: 0.3788 - accuracy: 0.8663\n",
+            "mlp accuracy  [0.29716673493385315, 0.897599995136261]\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "EpBtcX9D8DTg"
+      },
+      "source": [
+        "## cifar10 dataset"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "CEnQaCVhy16L",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "outputId": "aab27bdc-344a-41a2-d893-f6ae87496ac2"
+      },
+      "source": [
+        "dataset = tf.keras.datasets.cifar10\n",
+        "(X_train, Y_train), (X_test, Y_test) = dataset.load_data()\n",
+        "\n",
+        "print(X_train.shape, Y_train.shape, X_test.shape, Y_test.shape)\n",
+        "print(X_train.min(), X_train.max(), X_train.dtype)\n",
+        "print(X_test.min(), X_test.max(), X_test.dtype)\n",
+        "print(Y_train.min(), Y_train.max(), Y_train.dtype)\n",
+        "print(Y_test.min(), Y_test.max(), Y_test.dtype)"
+      ],
+      "execution_count": 3,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Downloading data from https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz\n",
+            "170500096/170498071 [==============================] - 11s 0us/step\n",
+            "170508288/170498071 [==============================] - 11s 0us/step\n",
+            "(50000, 32, 32, 3) (50000, 1) (10000, 32, 32, 3) (10000, 1)\n",
+            "0 255 uint8\n",
+            "0 255 uint8\n",
+            "0 9 uint8\n",
+            "0 9 uint8\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 283
+        },
+        "id": "Iz1d5KcX8hpQ",
+        "outputId": "d4573eba-6b4b-48f5-ccc6-2647006e5d4a"
+      },
+      "source": [
+        "plt.imshow(X_train[30], cmap = 'gray')"
+      ],
+      "execution_count": 4,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "<matplotlib.image.AxesImage at 0x7f7c71172590>"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 4
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "image/png": "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\n",
+            "text/plain": [
+              "<Figure size 432x288 with 1 Axes>"
+            ]
+          },
+          "metadata": {
+            "needs_background": "light"
+          }
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "BaMBo-A380BQ",
+        "outputId": "ad28e3ba-db6a-450b-995b-1aed049d9b3b"
+      },
+      "source": [
+        "\n",
+        "X_train = X_train.astype('float32') / 255.\n",
+        "X_test = X_test.astype('float32') / 255.\n",
+        "\n",
+        "print(X_train.min(), X_train.max(), X_train.dtype)\n",
+        "\n",
+        "classes = np.unique(Y_train)\n",
+        "# Y_train = to_categorical(Y_train, num_classes=len(classes))\n",
+        "# Y_test = to_categorical(Y_test, num_classes=len(classes))\n",
+        "# print(Y_train.shape, Y_test.shape)\n",
+        "# print(Y_train[0])"
+      ],
+      "execution_count": 5,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "0.0 1.0 float32\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "RP98wSolaeAe"
+      },
+      "source": [
+        "### deep"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "oJUxXjM9Z7dD",
+        "outputId": "b6b76741-06d4-4b08-c201-9d29444ca02a"
+      },
+      "source": [
+        "input_shape = (32, 32, 3)\n",
+        "\n",
+        "model = tf.keras.models.Sequential([\n",
+        "         Conv2D(32, (3, 3), input_shape=input_shape, activation='relu'),\n",
+        "         MaxPool2D((2, 2)),\n",
+        "         Conv2D(64, (3, 3), activation='relu'),\n",
+        "         MaxPool2D((2, 2)),\n",
+        "         Conv2D(128, (3, 3), activation='relu'),\n",
+        "         Flatten(),\n",
+        "        #  Dense(128, activation='relu'),\n",
+        "         Dense(64, activation='relu'),\n",
+        "         Dense(10, activation='softmax')                          \n",
+        "])\n",
+        "\n",
+        "model.compile(optimizer=tf.keras.optimizers.Adam(),\n",
+        "              loss=tf.keras.losses.sparse_categorical_crossentropy,\n",
+        "              metrics='accuracy')\n",
+        "\n",
+        "model.summary()\n"
+      ],
+      "execution_count": 18,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Model: \"sequential_5\"\n",
+            "_________________________________________________________________\n",
+            "Layer (type)                 Output Shape              Param #   \n",
+            "=================================================================\n",
+            "conv2d_15 (Conv2D)           (None, 30, 30, 32)        896       \n",
+            "_________________________________________________________________\n",
+            "max_pooling2d_10 (MaxPooling (None, 15, 15, 32)        0         \n",
+            "_________________________________________________________________\n",
+            "conv2d_16 (Conv2D)           (None, 13, 13, 64)        18496     \n",
+            "_________________________________________________________________\n",
+            "max_pooling2d_11 (MaxPooling (None, 6, 6, 64)          0         \n",
+            "_________________________________________________________________\n",
+            "conv2d_17 (Conv2D)           (None, 4, 4, 128)         73856     \n",
+            "_________________________________________________________________\n",
+            "flatten_5 (Flatten)          (None, 2048)              0         \n",
+            "_________________________________________________________________\n",
+            "dense_11 (Dense)             (None, 64)                131136    \n",
+            "_________________________________________________________________\n",
+            "dense_12 (Dense)             (None, 10)                650       \n",
+            "=================================================================\n",
+            "Total params: 225,034\n",
+            "Trainable params: 225,034\n",
+            "Non-trainable params: 0\n",
+            "_________________________________________________________________\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "RZ0hsqnyaEdi",
+        "outputId": "ce450cff-b6de-419c-8b12-6d5b1688dd94"
+      },
+      "source": [
+        "X_train, X_val, Y_train, Y_val = train_test_split(X_train, Y_train, test_size=0.2)\n",
+        "\n",
+        "model.fit(X_train, Y_train, validation_data=(X_val, Y_val), epochs=10, batch_size=20)"
+      ],
+      "execution_count": 19,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Epoch 1/10\n",
+            "656/656 [==============================] - 5s 7ms/step - loss: 1.7611 - accuracy: 0.3496 - val_loss: 1.5247 - val_accuracy: 0.4535\n",
+            "Epoch 2/10\n",
+            "656/656 [==============================] - 4s 7ms/step - loss: 1.3830 - accuracy: 0.5040 - val_loss: 1.4011 - val_accuracy: 0.4965\n",
+            "Epoch 3/10\n",
+            "656/656 [==============================] - 5s 7ms/step - loss: 1.2249 - accuracy: 0.5646 - val_loss: 1.2259 - val_accuracy: 0.5630\n",
+            "Epoch 4/10\n",
+            "656/656 [==============================] - 4s 7ms/step - loss: 1.1042 - accuracy: 0.6066 - val_loss: 1.2452 - val_accuracy: 0.5648\n",
+            "Epoch 5/10\n",
+            "656/656 [==============================] - 4s 7ms/step - loss: 1.0009 - accuracy: 0.6481 - val_loss: 1.0944 - val_accuracy: 0.6182\n",
+            "Epoch 6/10\n",
+            "656/656 [==============================] - 4s 7ms/step - loss: 0.9121 - accuracy: 0.6822 - val_loss: 1.0954 - val_accuracy: 0.6155\n",
+            "Epoch 7/10\n",
+            "656/656 [==============================] - 4s 7ms/step - loss: 0.8136 - accuracy: 0.7189 - val_loss: 1.0306 - val_accuracy: 0.6317\n",
+            "Epoch 8/10\n",
+            "656/656 [==============================] - 4s 7ms/step - loss: 0.7274 - accuracy: 0.7459 - val_loss: 1.1870 - val_accuracy: 0.6152\n",
+            "Epoch 9/10\n",
+            "656/656 [==============================] - 4s 7ms/step - loss: 0.6388 - accuracy: 0.7765 - val_loss: 1.1384 - val_accuracy: 0.6274\n",
+            "Epoch 10/10\n",
+            "656/656 [==============================] - 4s 7ms/step - loss: 0.5512 - accuracy: 0.8051 - val_loss: 1.1059 - val_accuracy: 0.6421\n"
+          ]
+        },
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "<keras.callbacks.History at 0x7f7c27d350d0>"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 19
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "pvMG6xDVaXNE",
+        "outputId": "6c5a6961-e89d-405c-a971-8a17da04bb2f"
+      },
+      "source": [
+        "model.evaluate(X_test, Y_test)\n"
+      ],
+      "execution_count": 20,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "313/313 [==============================] - 1s 4ms/step - loss: 1.1522 - accuracy: 0.6359\n"
+          ]
+        },
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "[1.1522371768951416, 0.6359000205993652]"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 20
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "uUS-ufeuagLh"
+      },
+      "source": [
+        "### mlp"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "SKfkphA7Zy7S",
+        "outputId": "a4f371d0-b7a1-4ad5-cf72-40d018ee45aa"
+      },
+      "source": [
+        "X_train = np.reshape(X_train, (-1, X_train.shape[1]* X_train.shape[2]* X_train.shape[3]))\n",
+        "X_test = np.reshape(X_test, (-1, X_test.shape[1] * X_test.shape[2]* X_test.shape[3]))\n",
+        "\n",
+        "print(X_train.shape, X_test.shape)"
+      ],
+      "execution_count": 21,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "(13107, 3072) (10000, 3072)\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "PrccctuY9J-y"
+      },
+      "source": [
+        "input_dim = X_train.shape[1]\n",
+        "\n",
+        "model = tf.keras.models.Sequential([\n",
+        "         Dense(64, input_dim = input_dim, activation='relu'),\n",
+        "         Dense(32, activation = 'relu'),\n",
+        "         Dense(16, activation = 'relu'),\n",
+        "         Dense(10, activation='softmax')                          \n",
+        "])\n",
+        "\n",
+        "model.compile(optimizer=tf.keras.optimizers.Adam(),\n",
+        "              loss=tf.keras.losses.sparse_categorical_crossentropy,\n",
+        "              metrics='accuracy')"
+      ],
+      "execution_count": 22,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "jkbeuwRN9Ozu",
+        "outputId": "37c90cb9-5436-4d8a-c767-3291cc3d06e0"
+      },
+      "source": [
+        "X_train, X_val, Y_train, Y_val = train_test_split(X_train, Y_train, test_size=0.2)\n",
+        "\n",
+        "model.fit(X_train, Y_train, validation_data=(X_val, Y_val), epochs=10)\n"
+      ],
+      "execution_count": 23,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Epoch 1/10\n",
+            "328/328 [==============================] - 2s 5ms/step - loss: 2.1530 - accuracy: 0.2054 - val_loss: 2.0226 - val_accuracy: 0.2769\n",
+            "Epoch 2/10\n",
+            "328/328 [==============================] - 1s 4ms/step - loss: 1.9659 - accuracy: 0.2799 - val_loss: 1.9327 - val_accuracy: 0.2792\n",
+            "Epoch 3/10\n",
+            "328/328 [==============================] - 1s 4ms/step - loss: 1.8880 - accuracy: 0.3157 - val_loss: 1.8585 - val_accuracy: 0.3196\n",
+            "Epoch 4/10\n",
+            "328/328 [==============================] - 1s 4ms/step - loss: 1.8384 - accuracy: 0.3327 - val_loss: 1.8222 - val_accuracy: 0.3448\n",
+            "Epoch 5/10\n",
+            "328/328 [==============================] - 1s 4ms/step - loss: 1.7935 - accuracy: 0.3531 - val_loss: 1.8018 - val_accuracy: 0.3516\n",
+            "Epoch 6/10\n",
+            "328/328 [==============================] - 1s 4ms/step - loss: 1.7802 - accuracy: 0.3542 - val_loss: 1.7928 - val_accuracy: 0.3455\n",
+            "Epoch 7/10\n",
+            "328/328 [==============================] - 1s 5ms/step - loss: 1.7550 - accuracy: 0.3660 - val_loss: 1.7444 - val_accuracy: 0.3627\n",
+            "Epoch 8/10\n",
+            "328/328 [==============================] - 1s 4ms/step - loss: 1.7227 - accuracy: 0.3784 - val_loss: 1.7883 - val_accuracy: 0.3368\n",
+            "Epoch 9/10\n",
+            "328/328 [==============================] - 1s 4ms/step - loss: 1.7072 - accuracy: 0.3900 - val_loss: 1.7311 - val_accuracy: 0.3669\n",
+            "Epoch 10/10\n",
+            "328/328 [==============================] - 1s 4ms/step - loss: 1.6908 - accuracy: 0.3932 - val_loss: 1.7368 - val_accuracy: 0.3661\n"
+          ]
+        },
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "<keras.callbacks.History at 0x7f7bc7b376d0>"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 23
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "ROVJtYeM9T3J",
+        "outputId": "c98c0882-5f37-47dd-f32b-44416fc232ef"
+      },
+      "source": [
+        "model.evaluate(X_test, Y_test)"
+      ],
+      "execution_count": 24,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "313/313 [==============================] - 1s 3ms/step - loss: 1.7294 - accuracy: 0.3759\n"
+          ]
+        },
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "[1.7294138669967651, 0.375900000333786]"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 24
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "23iPyqG99rmm"
+      },
+      "source": [
+        "## cifar100 dataset\n"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "E9YIBl6x9mk8",
+        "outputId": "502dd889-e0de-4026-9652-29932eeb42d9"
+      },
+      "source": [
+        "dataset = tf.keras.datasets.cifar100\n",
+        "(X_train, Y_train), (X_test, Y_test) = dataset.load_data()\n",
+        "\n",
+        "print(X_train.shape, Y_train.shape, X_test.shape, Y_test.shape)\n",
+        "print(X_train.min(), X_train.max(), X_train.dtype)\n",
+        "print(X_test.min(), X_test.max(), X_test.dtype)\n",
+        "print(Y_train.min(), Y_train.max(), Y_train.dtype)\n",
+        "print(Y_test.min(), Y_test.max(), Y_test.dtype)"
+      ],
+      "execution_count": 25,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Downloading data from https://www.cs.toronto.edu/~kriz/cifar-100-python.tar.gz\n",
+            "169009152/169001437 [==============================] - 11s 0us/step\n",
+            "169017344/169001437 [==============================] - 11s 0us/step\n",
+            "(50000, 32, 32, 3) (50000, 1) (10000, 32, 32, 3) (10000, 1)\n",
+            "0 255 uint8\n",
+            "0 255 uint8\n",
+            "0 99 int64\n",
+            "0 99 int64\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 283
+        },
+        "id": "wxtlh_YX9-iS",
+        "outputId": "13faea38-9a71-4e32-952e-cd5b44a452f4"
+      },
+      "source": [
+        "plt.imshow(X_train[30], cmap = 'gray')"
+      ],
+      "execution_count": 26,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "<matplotlib.image.AxesImage at 0x7f7bc79f1f50>"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 26
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "image/png": "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\n",
+            "text/plain": [
+              "<Figure size 432x288 with 1 Axes>"
+            ]
+          },
+          "metadata": {
+            "needs_background": "light"
+          }
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "NEsILsv6-CpD",
+        "outputId": "3ab0b649-07dc-4970-c187-b7873f88d658"
+      },
+      "source": [
+        "X_train = X_train.astype('float32') / 255.\n",
+        "X_test = X_test.astype('float32') / 255.\n",
+        "print(X_train.min(), X_train.max(), X_train.dtype)\n",
+        "\n",
+        "classes = np.unique(Y_train)\n",
+        "Y_train = to_categorical(Y_train, num_classes=len(classes))\n",
+        "Y_test = to_categorical(Y_test, num_classes=len(classes))\n",
+        "print(Y_train.shape, Y_test.shape)\n",
+        "print(Y_train[0])"
+      ],
+      "execution_count": 27,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "0.0 1.0 float32\n",
+            "(50000, 100) (10000, 100)\n",
+            "[0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 1. 0. 0. 0. 0.\n",
+            " 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.\n",
+            " 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.\n",
+            " 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0. 0.\n",
+            " 0. 0. 0. 0.]\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "QUSXWsxPbA2k"
+      },
+      "source": [
+        "### deep"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "5kXxP3yb-FMY",
+        "outputId": "cd2be30c-e208-4397-c694-5ec55d7a8595"
+      },
+      "source": [
+        "input_shape = (32, 32, 3)\n",
+        "\n",
+        "model = tf.keras.models.Sequential([\n",
+        "         Conv2D(32, (3, 3), input_shape=input_shape, activation='relu'),\n",
+        "         MaxPool2D((2, 2)),\n",
+        "         Conv2D(64, (3, 3), activation='relu'),\n",
+        "         MaxPool2D((2, 2)),\n",
+        "         Conv2D(64, (3, 3), activation='relu'),\n",
+        "         Flatten(),\n",
+        "         Dense(128, activation='relu'),\n",
+        "         Dense(64, activation='relu'),\n",
+        "         Dense(100, activation='softmax')                          \n",
+        "])\n",
+        "\n",
+        "model.compile(optimizer=tf.keras.optimizers.Adam(),\n",
+        "              loss=tf.keras.losses.categorical_crossentropy,\n",
+        "              metrics='accuracy')\n",
+        "\n",
+        "model.summary()"
+      ],
+      "execution_count": 30,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Model: \"sequential_8\"\n",
+            "_________________________________________________________________\n",
+            "Layer (type)                 Output Shape              Param #   \n",
+            "=================================================================\n",
+            "conv2d_21 (Conv2D)           (None, 30, 30, 32)        896       \n",
+            "_________________________________________________________________\n",
+            "max_pooling2d_14 (MaxPooling (None, 15, 15, 32)        0         \n",
+            "_________________________________________________________________\n",
+            "conv2d_22 (Conv2D)           (None, 13, 13, 64)        18496     \n",
+            "_________________________________________________________________\n",
+            "max_pooling2d_15 (MaxPooling (None, 6, 6, 64)          0         \n",
+            "_________________________________________________________________\n",
+            "conv2d_23 (Conv2D)           (None, 4, 4, 64)          36928     \n",
+            "_________________________________________________________________\n",
+            "flatten_7 (Flatten)          (None, 1024)              0         \n",
+            "_________________________________________________________________\n",
+            "dense_20 (Dense)             (None, 128)               131200    \n",
+            "_________________________________________________________________\n",
+            "dense_21 (Dense)             (None, 64)                8256      \n",
+            "_________________________________________________________________\n",
+            "dense_22 (Dense)             (None, 100)               6500      \n",
+            "=================================================================\n",
+            "Total params: 202,276\n",
+            "Trainable params: 202,276\n",
+            "Non-trainable params: 0\n",
+            "_________________________________________________________________\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "XaLa_yKJbOI7",
+        "outputId": "1296883b-7b99-48b8-c023-16f6a55d62c7"
+      },
+      "source": [
+        "X_train, X_val, Y_train, Y_val = train_test_split(X_train, Y_train, test_size=0.2)\n",
+        "\n",
+        "model.fit(X_train, Y_train, validation_data=(X_val, Y_val), epochs=10)"
+      ],
+      "execution_count": 31,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Epoch 1/10\n",
+            "1000/1000 [==============================] - 10s 10ms/step - loss: 4.1958 - accuracy: 0.0500 - val_loss: 3.9801 - val_accuracy: 0.0800\n",
+            "Epoch 2/10\n",
+            "1000/1000 [==============================] - 9s 9ms/step - loss: 3.6995 - accuracy: 0.1271 - val_loss: 3.5821 - val_accuracy: 0.1475\n",
+            "Epoch 3/10\n",
+            "1000/1000 [==============================] - 9s 9ms/step - loss: 3.4039 - accuracy: 0.1776 - val_loss: 3.3487 - val_accuracy: 0.1901\n",
+            "Epoch 4/10\n",
+            "1000/1000 [==============================] - 9s 9ms/step - loss: 3.1823 - accuracy: 0.2159 - val_loss: 3.1632 - val_accuracy: 0.2233\n",
+            "Epoch 5/10\n",
+            "1000/1000 [==============================] - 8s 8ms/step - loss: 3.0104 - accuracy: 0.2491 - val_loss: 3.0403 - val_accuracy: 0.2508\n",
+            "Epoch 6/10\n",
+            "1000/1000 [==============================] - 9s 9ms/step - loss: 2.8716 - accuracy: 0.2777 - val_loss: 3.0173 - val_accuracy: 0.2561\n",
+            "Epoch 7/10\n",
+            "1000/1000 [==============================] - 9s 9ms/step - loss: 2.7538 - accuracy: 0.2992 - val_loss: 2.9164 - val_accuracy: 0.2797\n",
+            "Epoch 8/10\n",
+            "1000/1000 [==============================] - 9s 9ms/step - loss: 2.6610 - accuracy: 0.3225 - val_loss: 2.8935 - val_accuracy: 0.2839\n",
+            "Epoch 9/10\n",
+            "1000/1000 [==============================] - 9s 9ms/step - loss: 2.5762 - accuracy: 0.3337 - val_loss: 2.8506 - val_accuracy: 0.2923\n",
+            "Epoch 10/10\n",
+            "1000/1000 [==============================] - 9s 9ms/step - loss: 2.4929 - accuracy: 0.3535 - val_loss: 2.9528 - val_accuracy: 0.2822\n"
+          ]
+        },
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "<keras.callbacks.History at 0x7f7bc77035d0>"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 31
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "O8Pcw8QBbPEj",
+        "outputId": "8b85fa12-4d7b-4720-fcba-38e37a2189d6"
+      },
+      "source": [
+        "model.evaluate(X_test, Y_test)"
+      ],
+      "execution_count": 32,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "313/313 [==============================] - 2s 5ms/step - loss: 2.9377 - accuracy: 0.2865\n"
+          ]
+        },
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "[2.93769907951355, 0.2865000069141388]"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 32
+        }
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "3LHHdOB1bSXr"
+      },
+      "source": [
+        "### mlp"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "xyajcJZGa5dD",
+        "outputId": "6331c7fd-9238-4c63-d8e1-55ec2ff04484"
+      },
+      "source": [
+        "X_train = np.reshape(X_train, (-1, X_train.shape[1]* X_train.shape[2]* X_train.shape[3]))\n",
+        "X_test = np.reshape(X_test, (-1, X_test.shape[1] * X_test.shape[2]* X_test.shape[3]))\n",
+        "print(X_train.shape, X_test.shape)\n"
+      ],
+      "execution_count": 33,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "(32000, 3072) (10000, 3072)\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "kDrr9P8C-a_r"
+      },
+      "source": [
+        "input_dim = X_train.shape[1]\n",
+        "\n",
+        "model = tf.keras.models.Sequential([\n",
+        "         Dense(64, input_dim = input_dim, activation='relu'),\n",
+        "         Dense(32, activation = 'relu'),\n",
+        "         Dense(32, activation = 'relu'),\n",
+        "         Dense(100, activation='softmax')                          \n",
+        "])\n",
+        "\n",
+        "model.compile(optimizer=tf.keras.optimizers.Adam(),\n",
+        "              loss=tf.keras.losses.categorical_crossentropy,\n",
+        "              metrics='accuracy')"
+      ],
+      "execution_count": 34,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "lRoSsybP-fVm",
+        "outputId": "e48bffcc-6701-40b5-ac28-e669a553ae83"
+      },
+      "source": [
+        "X_train, X_val, Y_train, Y_val = train_test_split(X_train, Y_train, test_size=0.2)\n",
+        "\n",
+        "model.fit(X_train, Y_train, validation_data=(X_val, Y_val), epochs=10)"
+      ],
+      "execution_count": 35,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Epoch 1/10\n",
+            "800/800 [==============================] - 4s 4ms/step - loss: 4.3504 - accuracy: 0.0395 - val_loss: 4.0958 - val_accuracy: 0.0614\n",
+            "Epoch 2/10\n",
+            "800/800 [==============================] - 3s 4ms/step - loss: 4.0442 - accuracy: 0.0728 - val_loss: 3.9816 - val_accuracy: 0.0722\n",
+            "Epoch 3/10\n",
+            "800/800 [==============================] - 3s 4ms/step - loss: 3.9302 - accuracy: 0.0900 - val_loss: 3.9175 - val_accuracy: 0.0909\n",
+            "Epoch 4/10\n",
+            "800/800 [==============================] - 3s 4ms/step - loss: 3.8545 - accuracy: 0.1023 - val_loss: 3.8326 - val_accuracy: 0.1003\n",
+            "Epoch 5/10\n",
+            "800/800 [==============================] - 3s 4ms/step - loss: 3.7869 - accuracy: 0.1152 - val_loss: 3.8547 - val_accuracy: 0.1058\n",
+            "Epoch 6/10\n",
+            "800/800 [==============================] - 3s 4ms/step - loss: 3.7310 - accuracy: 0.1263 - val_loss: 3.7817 - val_accuracy: 0.1172\n",
+            "Epoch 7/10\n",
+            "800/800 [==============================] - 3s 4ms/step - loss: 3.6832 - accuracy: 0.1344 - val_loss: 3.6957 - val_accuracy: 0.1270\n",
+            "Epoch 8/10\n",
+            "800/800 [==============================] - 3s 4ms/step - loss: 3.6488 - accuracy: 0.1387 - val_loss: 3.7750 - val_accuracy: 0.1222\n",
+            "Epoch 9/10\n",
+            "800/800 [==============================] - 3s 4ms/step - loss: 3.6200 - accuracy: 0.1429 - val_loss: 3.6715 - val_accuracy: 0.1314\n",
+            "Epoch 10/10\n",
+            "800/800 [==============================] - 3s 4ms/step - loss: 3.5896 - accuracy: 0.1482 - val_loss: 3.6493 - val_accuracy: 0.1408\n"
+          ]
+        },
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "<keras.callbacks.History at 0x7f7bc7497590>"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 35
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "xGQZK7NX-tuX",
+        "outputId": "e070839e-327c-4015-fa42-1f3af59ee2f2"
+      },
+      "source": [
+        "model.evaluate(X_test, Y_test)"
+      ],
+      "execution_count": 36,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "313/313 [==============================] - 2s 4ms/step - loss: 3.6983 - accuracy: 0.1398\n"
+          ]
+        },
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "[3.6982789039611816, 0.13979999721050262]"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 36
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "gLJvdwu7-iAK"
+      },
+      "source": [
+        ""
+      ],
+      "execution_count": null,
+      "outputs": []
+    }
+  ]
+}
