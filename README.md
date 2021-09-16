@@ -13,7 +13,13 @@
 
 ## 02- Sheykh-Recognition
 
-- Normal-People and Sheykh-People images classification
+- Train Neural Network for classification Normal-People and Sheykh-People images
+
+- [x] train.ipynb
+
+- [x] inference.py
+
+- [ ] bot.py
 
 For inference run the following command:
 
