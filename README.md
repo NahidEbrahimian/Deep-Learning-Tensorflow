@@ -10,3 +10,14 @@
 |Fashion Mnist     | 0.86       | 0.89    |
 |Cfar 10     | 0.37       | 0.63      |
 |Cfar 100     | 0.13       | 0.28      |
+
+## 02- Sheykh-Recognition
+
+- Normal-People and Sheykh-People images classification
+
+For inference run the following command:
+
+```
+!python3 inference.py --input_image test/image3.jpg
+
+```
