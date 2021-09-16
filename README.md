@@ -13,7 +13,7 @@
 
 ## 02- Sheykh-Recognition
 
-- Train Neural Network for classification Normal-People and Sheykh-People images
+- Train Neural Network for Normal-People and Sheykh-People images classification
 
 - [x] train.ipynb
 
