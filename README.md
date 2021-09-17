@@ -48,6 +48,6 @@ contain images from two classes, normal person and sheikh
 
 #### Usage:
 
-1. Click [here](t.me/SheikhRecognition_bot) to open the chat with the bot in the Telegram app
+1. Click [here](https://t.me/SheikhRecognition_bot) to open the chat with the bot in the Telegram app
 
 2. Start the bot and send him a photo
