@@ -51,3 +51,25 @@ contain images from two classes, normal person and sheikh
 1. Click [here](https://t.me/SheikhRecognition_bot) to open the chat with the bot in the Telegram app
 
 2. Start the bot and send him a photo
+
+## 04- Persian Face Recognition
+
+1. Preprocessing
+
+Preprocess stage consists of 4 common stages: detect, align, represent and verify.
+
+You must first clone retinaface using the following command:
+
+```
+!git clone https://github.com/serengil/retinaface
+```
+
+then, run the following command to aplly preprocessing:
+
+input_images_path --> the path of data that you want to pre-process them
+
+output_path --> path for save preprocessed images
+
+```
+!python3 preprocess.py --input_images_path 'input image path' --output_path 'ouput path'
+```
