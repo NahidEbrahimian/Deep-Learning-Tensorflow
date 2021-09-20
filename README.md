@@ -64,7 +64,7 @@ You must first clone retinaface using the following command:
 !git clone https://github.com/serengil/retinaface
 ```
 
-then, run the following command to aplly preprocessing:
+then, run the following command to apply preprocessing:
 
 input_images_path --> the path of data that you want to pre-process them
 
