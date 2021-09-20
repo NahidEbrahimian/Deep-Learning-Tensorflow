@@ -71,5 +71,5 @@ input_images_path --> the path of data that you want to pre-process them
 output_path --> path for save preprocessed images
 
 ```
-!python3 preprocess.py --input_images_path "input images path" --output_path "ouput path"
+!python3 preprocess.py --input_images_path "./input-images-path" --output_path "./ouput-path"
 ```
