@@ -63,9 +63,11 @@ You must first clone retinaface using the following command:
 ```
 !git clone https://github.com/serengil/retinaface
 ```
+Put `preprocess.py` in ./retinaface directory.
 
 then, run the following command to apply preprocessing:
 
 ```
-!python3 preprocess.py --input_images_path "./input-images-path" --output_path "./ouput-path"
+%cd ./retinaface
+!python3 preprocess.py --input_images_dir "./dataset_dir" --output_dir "./output_dir"
 ```
