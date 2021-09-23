@@ -58,14 +58,15 @@ contain images from two classes, normal person and sheikh
 
 Preprocess stage consists of 4 common stages: detect, align, represent and verify.
 
-You must first clone retinaface using the following command:
+- you must first clone retinaface using the following command:
 
 ```
 !git clone https://github.com/serengil/retinaface
 ```
-Put `preprocess.py` in ./retinaface directory.
 
-then, run the following command to apply preprocessing:
+- put `preprocess.py` in `./retinaface` directory.
+
+- then, run the following command to apply preprocessing:
 
 ```
 %cd ./retinaface
