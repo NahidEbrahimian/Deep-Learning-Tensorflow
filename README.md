@@ -64,7 +64,11 @@ Preprocess stage consists of 4 common stages: detect, align, represent and verif
 !git clone https://github.com/serengil/retinaface
 ```
 
-2. put `preprocess.py` in `./retinaface` directory.
+2. copy `preprocess.py` in `./retinaface` directory:
+
+```
+!cp preprocess.py ./retinaface
+```
 
 3. then, run the following command to apply preprocessing:
 
