@@ -72,3 +72,22 @@ Preprocess stage consists of 4 common stages: detect, align, represent and verif
 %cd ./retinaface
 !python3 preprocess.py --input_images_dir "./dataset_dir" --output_dir "./output_dir"
 ```
+
+#
+
+## 05- 17Flowers Classification
+
+#### Dataset:
+
+Contain images from 17 classes of flowers in two subset, train and test.
+
+#### Result:
+
+Comparison accuracy of pretrained models that used in transfer learning on test data:
+
+| Model | Accuracy |
+| :---         |     :---:      |
+| Vgg16  | 0.67     | 
+|Vgg19     | 0.70       | 
+|ResNet50V2    | 0.82       |
+|MobileNetV2     | 0.37       | 
