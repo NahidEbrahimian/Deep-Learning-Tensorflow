@@ -95,3 +95,11 @@ Comparison accuracy of pretrained models that used in transfer learning on test 
 |Vgg19     | 0.70       | 
 |ResNet50V2    | 0.82       |
 |MobileNetV2     | 0.37       | 
+
+#
+
+## 06- WeatherPrediction_Regression
+
+- Train Neural Network on weather-dataset using tensorflow and keras
+
+- Loss on test data: 3.0455
