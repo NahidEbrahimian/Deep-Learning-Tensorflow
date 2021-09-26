@@ -85,6 +85,8 @@ Preprocess stage consists of 4 common stages: detect, align, represent and verif
 
 Contain images from 17 classes of flowers in two subset, train and test.
 
+Dataset: [Flowers]( https://drive.google.com/drive/folders/1-7GcWubgmhIImiZUrghV3haBjIeLoEhf?usp=sharing)
+
 #### Result:
 
 Comparison accuracy of pretrained models that used in transfer learning on test data:
@@ -101,5 +103,9 @@ Comparison accuracy of pretrained models that used in transfer learning on test 
 ## 06- WeatherPrediction_Regression
 
 - Train Neural Network on weather-dataset using tensorflow and keras
+
+#### Dataset:
+
+Dataset: [weather-dataset]( https://drive.google.com/drive/folders/10OdTbgLI8O-ZezfHopbpbqgJ_lI9M5D-?usp=sharing)
 
 - Loss on test data: 3.0455
