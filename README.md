@@ -109,3 +109,29 @@ Comparison accuracy of pretrained models that used in transfer learning on test 
 Dataset: [weather-dataset]( https://drive.google.com/drive/folders/10OdTbgLI8O-ZezfHopbpbqgJ_lI9M5D-?usp=sharing)
 
 - Loss on test data: 3.0455
+
+## 07- UTKFace-Age prediction-Regression
+
+- Train Neural Network on UTKFace dataset using tensorflow and keras
+
+- [x] train.ipynb
+
+- [x] inference.py
+
+#### Dataset:
+
+Dataset: [UTKFace-dataset]( https://www.kaggle.com/jangedoo/utkface-new)
+
+
+#### inference:
+
+1- First install retina-face
+```
+!pip install retina-face
+```
+
+2- Run the following command:
+
+```
+!python3 inference.py --image_path 'input/08.jpg'
+```
