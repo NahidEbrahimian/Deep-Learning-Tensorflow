@@ -62,7 +62,7 @@ contain images from two classes, normal person and sheikh
 
 #### Preprocessing
 
-Preprocess stage consists of 4 common stages: detect, align, represent and verify.
+Preprocess stage consists of 4 common stages: detect, align, represent and verify. link: [Github]( https://github.com/serengil/retinaface#:~:text=RetinaFace%20is%20a%20deep%20learning,is%20published%20by%20Stanislas%20Bertrand.)
 
 1. You must first install retinaface:
 
@@ -84,7 +84,7 @@ Preprocess stage consists of 4 common stages: detect, align, represent and verif
 
 Contain images from 17 classes of flowers in two subset, train and test.
 
-Dataset: [Flowers]( https://drive.google.com/drive/folders/1-7GcWubgmhIImiZUrghV3haBjIeLoEhf?usp=sharing)
+Dataset link: [Flowers]( https://drive.google.com/drive/folders/1-7GcWubgmhIImiZUrghV3haBjIeLoEhf?usp=sharing)
 
 #### Result:
 
@@ -105,7 +105,7 @@ Comparison accuracy of pretrained models that used in transfer learning on test 
 
 #### Dataset:
 
-Dataset: [weather-dataset]( https://drive.google.com/drive/folders/10OdTbgLI8O-ZezfHopbpbqgJ_lI9M5D-?usp=sharing)
+Dataset link: [weather-dataset]( https://drive.google.com/drive/folders/10OdTbgLI8O-ZezfHopbpbqgJ_lI9M5D-?usp=sharing)
 
 - Loss on test data: 3.0455
 
@@ -119,7 +119,7 @@ Dataset: [weather-dataset]( https://drive.google.com/drive/folders/10OdTbgLI8O-Z
 
 #### Dataset:
 
-Dataset: [UTKFace-dataset]( https://www.kaggle.com/jangedoo/utkface-new)
+Dataset link: [UTKFace-dataset]( https://www.kaggle.com/jangedoo/utkface-new)
 
 
 #### inference:
@@ -145,7 +145,7 @@ Dataset: [UTKFace-dataset]( https://www.kaggle.com/jangedoo/utkface-new)
 
 #### Dataset:
 
-Dataset: [gender-recognition-dataset]( https://www.kaggle.com/ashishjangra27/gender-recognition-200k-images-celeba)
+Dataset link: [gender-recognition-dataset]( https://www.kaggle.com/ashishjangra27/gender-recognition-200k-images-celeba)
 
 ## 09- Face Mask Detection
 
@@ -157,7 +157,7 @@ Dataset: [gender-recognition-dataset]( https://www.kaggle.com/ashishjangra27/gen
 
 #### Dataset:
 
-Dataset: [face-mask-dataset]( ashishjangra27/face-mask-12k-images-dataset)
+Dataset link: [face-mask-dataset]( ashishjangra27/face-mask-12k-images-dataset)
 
 
 
