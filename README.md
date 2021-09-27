@@ -135,3 +135,30 @@ Dataset: [UTKFace-dataset]( https://www.kaggle.com/jangedoo/utkface-new)
 ```
 !python3 inference.py --image_path 'input/08.jpg'
 ```
+
+## 08- Gender Recognition
+
+- Train Neural Network on gender-recognition dataset using tensorflow and keras
+
+- [x] train.ipynb
+
+- [ ] inference.py
+
+#### Dataset:
+
+Dataset: [gender-recognition-dataset]( https://www.kaggle.com/ashishjangra27/gender-recognition-200k-images-celeba)
+
+## 09- Face Mask Detection
+
+- Train Neural Network on face-mask dataset using tensorflow and keras
+
+- [x] train.ipynb
+
+- [ ] inference.py
+
+#### Dataset:
+
+Dataset: [face-mask-dataset]( ashishjangra27/face-mask-12k-images-dataset)
+
+
+
