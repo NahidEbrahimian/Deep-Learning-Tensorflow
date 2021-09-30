@@ -10,7 +10,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--input_dir", type=str)
 args = parser.parse_args()
 
-model = load_model("model.h5")
+model = load_model("/weights/model.h5")
 
 images = []
 inputImages = []
