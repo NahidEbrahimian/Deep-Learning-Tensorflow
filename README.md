@@ -159,5 +159,13 @@ Dataset link: [gender-recognition-dataset]( https://www.kaggle.com/ashishjangra2
 
 Dataset link: [face-mask-dataset]( ashishjangra27/face-mask-12k-images-dataset)
 
+## 10- Houses Price Image Regression
 
+- Train Neural Network for house price prediction using images
+
+- [x] train.ipynb
+
+- [x] inference.py
+
+Reference: [KerasRegressionandCNNs]( https://www.pyimagesearch.com/2019/01/28/keras-regression-and-cnns/)
 
