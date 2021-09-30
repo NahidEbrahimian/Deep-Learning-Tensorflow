@@ -13,7 +13,6 @@ args = parser.parse_args()
 model = load_model("weights/model.h5")
 
 images = []
-inputImages = []
 outputImage = np.zeros((64, 64, 3), dtype="uint8")
 
 for im in os.listdir(args.input_dir):
