@@ -26,9 +26,9 @@ outputImage[0:32, 32:64] = images[1]
 outputImage[32:64, 32:64] = images[2]
 outputImage[32:64, 0:32] = images[3]
 
-images = np.array(images)
-images = images / 255
+outputImage = np.array(outputImage)
+outputImage = outputImage / 255
 
-images = images.reshape(1, 64, 64, 3)
-pred = model.predict([images])
+outputImage = outputImage.reshape(1, 64, 64, 3)
+pred = model.predict([outputImage])
 print('Predicted Price: ', pred[0])
