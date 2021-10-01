@@ -171,7 +171,7 @@ Reference: [KerasRegressionandCNNs]( https://www.pyimagesearch.com/2019/01/28/ke
 
 #
 
-## 1- DCGAN_on_Mnist_dataset
+## 11- DCGAN_on_Mnist_dataset
 
 - Training DCGAN on Mnist dataset
 
