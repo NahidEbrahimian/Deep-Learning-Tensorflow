@@ -169,3 +169,14 @@ Dataset link: [face-mask-dataset]( ashishjangra27/face-mask-12k-images-dataset)
 
 Reference: [KerasRegressionandCNNs]( https://www.pyimagesearch.com/2019/01/28/keras-regression-and-cnns/)
 
+#
+
+## 1- DCGAN_on_Mnist_dataset
+
+- Training DCGAN on Mnist dataset
+
+![DCGAN-02](https://user-images.githubusercontent.com/82975802/135684094-e46ae7fd-4d25-401c-b91b-7fe30cef7164.gif)
+
+Reference: [tensorflow-tutorials]( https://www.tensorflow.org/tutorials/generative/dcgan)
+
+
