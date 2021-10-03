@@ -145,7 +145,7 @@ Dataset link: [UTKFace-dataset]( https://www.kaggle.com/jangedoo/utkface-new)
 
 #### Dataset:
 
-Dataset link: [gender-recognition-dataset]( https://www.kaggle.com/ashishjangra27/gender-recognition-200k-images-celeba)
+Dataset link: [celeba-dataset]( https://www.kaggle.com/ashishjangra27/gender-recognition-200k-images-celeba)
 
 ## 09- Face Mask Detection
 
@@ -179,4 +179,10 @@ Reference: [KerasRegressionandCNNs]( https://www.pyimagesearch.com/2019/01/28/ke
 
 Reference: [tensorflow-tutorials]( https://www.tensorflow.org/tutorials/generative/dcgan)
 
+## 12- DCGAN_on_Celeb_A_dataset
 
+- Face Generator, Training DCGAN on celeba dataset
+
+![DCGAN-Celeb_A-02 (1)](https://user-images.githubusercontent.com/82975802/135740954-117c825d-d07e-4b8f-a100-74d61a72b933.gif)
+
+Dataset link: [celeba-dataset]( https://www.kaggle.com/ashishjangra27/gender-recognition-200k-images-celeba)
