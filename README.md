@@ -176,3 +176,4 @@ Reference: [tensorflow-tutorials]( https://www.tensorflow.org/tutorials/generati
 ![DCGAN-Celeb_A-02 (1)](https://user-images.githubusercontent.com/82975802/135740954-117c825d-d07e-4b8f-a100-74d61a72b933.gif)
 
 Dataset link: [celeba-dataset]( https://www.kaggle.com/ashishjangra27/gender-recognition-200k-images-celeba)
+
