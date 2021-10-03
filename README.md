@@ -99,16 +99,6 @@ Comparison accuracy of pretrained models that used in transfer learning on test 
 
 #
 
-## 06- WeatherPrediction_Regression
-
-- Train Neural Network on weather-dataset using tensorflow and keras
-
-#### Dataset:
-
-Dataset link: [weather-dataset]( https://drive.google.com/drive/folders/10OdTbgLI8O-ZezfHopbpbqgJ_lI9M5D-?usp=sharing)
-
-- Loss on test data: 3.0455
-
 ## 07- UTKFace-Age prediction-Regression
 
 - Train Neural Network on UTKFace dataset using tensorflow and keras
