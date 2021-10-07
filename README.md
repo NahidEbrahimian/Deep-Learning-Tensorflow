@@ -137,17 +137,6 @@ Dataset link: [UTKFace-dataset]( https://www.kaggle.com/jangedoo/utkface-new)
 
 Dataset link: [celeba-dataset]( https://www.kaggle.com/ashishjangra27/gender-recognition-200k-images-celeba)
 
-## 09- Face Mask Detection
-
-- Train Neural Network on face-mask dataset using tensorflow and keras
-
-- [x] train.ipynb
-
-- [ ] inference.py
-
-#### Dataset:
-
-Dataset link: [face-mask-dataset]( ashishjangra27/face-mask-12k-images-dataset)
 
 ## 10- Houses Price Image Regression
 
