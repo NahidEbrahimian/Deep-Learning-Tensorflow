@@ -49,8 +49,3 @@ class MyModel(tf.keras.Model):
       x = Input(shape=(self.dim))
       return tf.keras.Model(inputs=[x], outputs=self.call(x))
 
-
-input_shape = (width ,height ,3)
-model = MyModel(14, (input_shape))
-model.build((None, *input_shape))
-model.load_weights('weights/checkpoint')

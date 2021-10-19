@@ -9,7 +9,7 @@ from model import MyModel
 input_shape = (width ,height ,3)
 model = MyModel(14, (input_shape))
 model.build((None, *input_shape))
-model.load_weights('weights/checkpoint')
+model.load_weights('checkpoint')
 
 def get_optimal_font_scale(text, width):
 
